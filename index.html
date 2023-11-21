@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>COVID-19 Data by State and Date</title>
+    <link rel="stylesheet" href="./style.css">
+    <script src="./script.js"></script>
+</head>
+
+<body>
+    <div class="page">
+        <h1>Enter State Name:</h1>
+        <input type="text" class="state-input" placeholder="Enter state name">
+
+        <h1>Enter Date (YYYY-MM-DD):</h1>
+        <input type="text" class="date-input" placeholder="Enter date">
+
+        <button class="get-data-btn">Get Data</button>
+
+        <div class="result"></div>
+
+    </div>
+    <script>
+        function fetchCovidData(state, date) {
+            const apiEndpoint = 'https://data.covid19india.org/v4/min/timeseries.min.json';
+
+            return new Promise((resolve, reject) => {
+                // Fetching data from the API
+                fetch(apiEndpoint)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Failed to fetch data');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        // Filtering data based on state (case insensitive)
+                        const filteredData = Object.entries(data).filter(([key]) => key.toLowerCase() === state.toLowerCase());
+
+                        if (filteredData.length > 0) {
+                            // Accessing date-specific data for the state
+                            const stateData = filteredData[0][1]['dates'];
+                            const filteredDateData = Object.entries(stateData).filter(([key]) => key === date);
+
+                            if (filteredDateData.length > 0) {
+                                // Retrieving confirmed cases for the specified date and state
+                                const confirmedCases = filteredDateData[0][1]['total']['confirmed'];
+
+                                resolve({
+                                    date: date,
+                                    cases: confirmedCases
+                                });
+                            } else {
+                                // Throw error if data for the specified date is not found for the state
+                                reject(new Error(`Data for ${date} not found for ${state}`));
+                            }
+                        } else {
+                            // Throw error if data for the specified state is not found
+                            reject(new Error(`Data for ${state} not found`));
+                        }
+                    })
+                    .catch(error => {
+                        reject(error); // Reject if there's an error in the fetch or data processing
+                    });
+            });
+        }
+
+        function displayCovidData(state, data) {
+            // Displaying retrieved COVID-19 data in the result div
+            const resultDiv = document.querySelector('.result');
+            resultDiv.innerHTML = `
+                <h2>Date: ${data.date}</h2>
+                <h2>Confirmed cases in ${state}: ${data.cases}</h2>
+            `;
+        }
+
+        function showError(message) {
+            // Displaying error message in the result div
+            const resultDiv = document.querySelector('.result');
+            resultDiv.innerHTML = `<h2>Error: ${message}</h2>`;
+        }
+
+        function getCovidData() {
+            // Retrieving input values
+            const state = document.querySelector('.state-input').value.trim();
+            const date = document.querySelector('.date-input').value.trim();
+
+            // Fetching COVID-19 data based on input values
+            fetchCovidData(state, date)
+                .then(data => displayCovidData(state, data)) // Displaying data on success
+                .catch(error => showError(error.message)); // Displaying error on failure
+        }
+
+        // Attaching click event to the button for fetching data
+        document.querySelector('.get-data-btn').addEventListener('click', getCovidData);
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,26 @@
+.page{
+    text-align: center;
+    padding: 20px;
+}
+*{
+    background-color: lightgoldenrodyellow;
+}
+.state-input{
+    height: 30px;
+    width: 250px;
+    font-weight: bold;
+    font-size: large;
+}
+.date-input{
+    height: 30px;
+    width: 250px;
+    font-weight: bold;
+    font-size: large;
+}
+.get-data-btn{
+    height: 30px;
+    width: 100px;
+    font-weight: bold;
+    background-color: gray;
+    color: cornsilk;
+}
